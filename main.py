@@ -1,0 +1,176 @@
+import customtkinter as ctk
+import threading
+import subprocess
+import os
+from scanner import run_scan
+from datetime import datetime
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
+class ScannerApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+
+        self.title("AI Tool - Cyber Recon Scanner")
+        self.geometry("900x750")
+
+        self.menu = ctk.CTkFrame(self, corner_radius=0)
+        self.menu.pack(fill='x')
+        self.about_button = ctk.CTkButton(self.menu, text="About", command=self.show_about)
+        self.about_button.pack(side="right", padx=10, pady=5)
+
+        self.entry = ctk.CTkEntry(self, placeholder_text="Enter Domain or IP", width=400)
+        self.entry.pack(pady=10)
+
+        self.sqlmap_entry = ctk.CTkEntry(self, placeholder_text="Optional SQLmap URL (e.g., http://target.com/index.php?id=1)", width=600)
+        self.sqlmap_entry.pack(pady=5)
+
+        self.gobuster_port_entry = ctk.CTkEntry(self, placeholder_text="Optional Gobuster Port (e.g., 8080)", width=250)
+        self.gobuster_port_entry.pack(pady=5)
+
+        self.button_frame = ctk.CTkFrame(self)
+        self.button_frame.pack(pady=10)
+
+        self.scan_buttons = []
+        scans = ["Nmap", "Nikto", "SQLmap", "Gobuster", "Metasploit", "All"]
+        for scan in scans:
+            btn = ctk.CTkButton(self.button_frame, text=scan, command=lambda s=scan: self.start_scan(s.lower()))
+            btn.pack(side="left", padx=5)
+            self.scan_buttons.append(btn)
+
+        self.force_var = ctk.BooleanVar()
+        self.force_checkbox = ctk.CTkCheckBox(self, text="Force Host Scan (-Pn)", variable=self.force_var)
+        self.force_checkbox.pack(pady=5)
+
+        self.control_frame = ctk.CTkFrame(self)
+        self.control_frame.pack(pady=5)
+
+        self.stop_button = ctk.CTkButton(self.control_frame, text="Stop Scan", command=self.stop_scan, fg_color="red")
+        self.stop_button.pack(side="left", padx=10)
+
+        self.clear_button = ctk.CTkButton(self.control_frame, text="Clear Log", command=self.clear_log)
+        self.clear_button.pack(side="left")
+
+        self.progress = ctk.CTkProgressBar(self, width=700)
+        self.progress.pack(pady=5)
+        self.progress.set(0)
+
+        self.log_text = ctk.CTkTextbox(self, width=850, height=400)
+        self.log_text.pack(pady=10)
+
+        self.scan_thread = None
+        self.running = False
+        self.log_file = "results/scan_log.txt"
+
+    def start_scan(self, scan_type):
+        domain = self.entry.get()
+        custom_sqlmap_url = self.sqlmap_entry.get()
+        custom_port = self.gobuster_port_entry.get()
+
+        if not domain:
+            self.log("Please enter a domain or IP.")
+            return
+
+        if self.running:
+            self.log("Scan already in progress. Please wait or stop it.")
+            return
+
+        os.makedirs("results", exist_ok=True)
+        self.running = True
+        self.progress.set(0)
+        open(self.log_file, 'w').close()
+        force = self.force_var.get()
+
+        self.scan_thread = threading.Thread(
+            target=self.run_scan_wrapper,
+            args=(domain, scan_type, force, custom_sqlmap_url, custom_port)
+        )
+        self.scan_thread.start()
+
+    def run_scan_wrapper(self, domain, scan_type, force, custom_sqlmap_url, custom_port):
+        self.log(f"Starting {scan_type} scan on {domain}...")
+        tool_count = 6 if scan_type == "all" else 1
+        progress_step = 1 / tool_count
+        current_progress = 0
+
+        for log in run_scan(domain, scan_type, force, custom_sqlmap_url, custom_port):
+            if not self.running:
+                self.log("Scan stopped.")
+                return
+            self.log(log)
+            if "host seems down" in log.lower():
+                self.log("[!] Host appears down. Try enabling 'Force Host Scan'.")
+            if log.startswith("Running"):
+                current_progress += progress_step / 2
+            elif log.startswith("Command executed") or "completed" in log.lower():
+                current_progress += progress_step / 2
+                self.progress.set(min(current_progress, 1.0))
+
+        self.running = False
+        self.progress.set(1.0)
+        output_file = f"results/{scan_type}_scan.txt"
+        if os.path.exists(output_file):
+            with open(output_file, "r") as f:
+                self.log(f"\n----- {scan_type.upper()} RESULTS -----")
+                for line in f:
+                    self.log(line.strip())
+        else:
+            self.log(f"No output file found for {scan_type}")
+
+        self.log(f"{scan_type} scan completed.")
+        self.generate_pdf_report()
+
+    def stop_scan(self):
+        self.running = False
+        self.log("Stopping current scan...")
+
+    def clear_log(self):
+        self.log_text.delete("0.0", "end")
+        open(self.log_file, 'w').close()
+        self.log("Log cleared.")
+
+    def log(self, message):
+        timestamp = datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
+        log_entry = f"{timestamp} {message}"
+        self.log_text.insert("end", log_entry + "\n")
+        self.log_text.see("end")
+        with open(self.log_file, "a") as f:
+            f.write(log_entry + "\n")
+
+    def show_about(self):
+        about_text = (
+            "AI Tool - Cyber Recon Scanner\n"
+            "Author: Muhammed Faris\n"
+            "Version: 1.0\n"
+            "Tool for scanning using Nmap, Nikto, SQLmap, Gobuster, Metasploit."
+        )
+        self.log(about_text)
+
+    def generate_pdf_report(self):
+        pdf_path = "results/scan_report.pdf"
+        c = canvas.Canvas(pdf_path, pagesize=letter)
+        c.setFont("Helvetica", 12)
+        c.drawString(100, 750, "Cyber Recon Scanner - Scan Report")
+        c.drawString(100, 735, f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        c.drawString(100, 720, "------------------------------------------")
+
+        y = 700
+        with open(self.log_file, "r") as f:
+            for line in f:
+                if y < 50:
+                    c.showPage()
+                    c.setFont("Helvetica", 12)
+                    y = 750
+                c.drawString(50, y, line.strip())
+                y -= 15
+
+        c.save()
+        self.log(f"PDF report generated at: {pdf_path}")
+
+if __name__ == "__main__":
+    app = ScannerApp()
+    app.mainloop()
+
+

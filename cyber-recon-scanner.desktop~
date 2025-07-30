@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Cyber Recon Scanner
+Exec=python3 /home/kali/cyber-recon-scanner/main.py
+Icon=/home/kali/cyber-recon-scanner/assets/icon.png
+Terminal=false
+Type=Application
+Categories=Utility;Security;
+
