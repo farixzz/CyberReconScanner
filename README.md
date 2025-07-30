@@ -2,7 +2,7 @@
 
 A Python-based GUI tool for offensive reconnaissance, integrating powerful scanning utilities like Nmap, Nikto, SQLMap, Gobuster, Metasploit, and Hydra — all under one sleek interface powered by `CustomTkinter`.
 
-![Cyber Recon Scanner Banner](A_professional_digital_graphic_banner_showcases_%22C.png)
+
 
 ---
 
@@ -83,3 +83,14 @@ Feel free to fork the repo and submit a pull request.
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author
+
+**Faris Muhammed**  
+Ethical Hacker & Cybersecurity Analyst | Specializing in VAPT, Python Automation & OSINT Tools  
+
+🔗 [LinkedIn](https://www.linkedin.com/in/muhammed-faris-p/)  
+💻 [GitHub](https://github.com/farixzz)  
+🌐 [Portfolio](https://farixzz.github.io/)
