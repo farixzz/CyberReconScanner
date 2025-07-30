@@ -94,3 +94,14 @@ Ethical Hacker & Cybersecurity Analyst | Specializing in VAPT, Python Automation
 🔗 [LinkedIn](https://www.linkedin.com/in/muhammed-faris-p/)  
 💻 [GitHub](https://github.com/farixzz)  
 🌐 [Portfolio](https://farixzz.github.io/)
+
+---
+
+## ⚠️ Disclaimer
+
+This tool is developed strictly for educational purposes and authorized security testing only.
+Cyber Recon Scanner is intended to aid ethical hackers and security professionals in conducting secure and legal reconnaissance on systems they own or have explicit permission to test.
+
+❌ Do NOT use this tool for any unauthorized or malicious activity.
+
+The developer is not responsible for any misuse or damage caused by this tool. Always follow your local laws and industry best practices.
