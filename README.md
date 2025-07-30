@@ -12,9 +12,9 @@ A Python-based GUI tool for offensive reconnaissance, integrating powerful scann
 - 🧠 Intelligent domain/IP recognition
 - 📦 Results saved automatically (`/results` folder)
 - ⚙️ Customizable scan options (ports, SQLMap URLs, force mode)
-- 🧾 Exportable PDF scan reports (coming soon!)
+- 🧾 Exportable PDF scan reports
 - 🪪 Dark Mode GUI powered by `CustomTkinter`
-- 🛠 Hydra Brute Force login support
+- 🛠 Hydra Brute Force login support (adding soon!)
 - ✅ Supports both `HTTP` & `HTTPS` fallback
 
 ---
@@ -28,7 +28,7 @@ A Python-based GUI tool for offensive reconnaissance, integrating powerful scann
 | **SQLMap** | SQL injection testing             |
 | **Gobuster** | Directory brute forcing          |
 | **Metasploit** | Multi-module exploit scanner  |
-| **Hydra**  | Brute-force login on protocols (FTP, SSH, HTTP, etc.) |
+
 
 ---
 
@@ -68,7 +68,7 @@ python main.py
 
 1. Run `main.py`
 2. Enter the target IP or domain.
-3. Select tools to include (e.g., Nmap, Hydra).
+3. Select tools to include (e.g., Nmap, GoBuster).
 4. Hit **"Run Scan"** and view results in terminal or `/results` folder.
 
 ---
